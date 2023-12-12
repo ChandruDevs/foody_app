@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Details</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Team Details</h2>
+
+<p><strong>Name:</strong> {{ team.name }}</p>
+<p><strong>Description:</strong> {{ team.description }}</p>
+<p><strong>Team Leader:</strong>
+    {{ team.team_lead_id.name }}
+</p>
+
+<p><strong>Employees under this team:</strong></p>
+<ul>
+    {% for employee in employees %}
+        <li>
+            <strong>Emp Id:</strong> {{ employee.id }}<br>
+            <strong>Name:</strong> {{ employee.name }}<br>
+            <strong>Email:</strong> {{ employee.email }}
+        </li>
+    {% endfor %}
+</ul>
+
+<button onclick="editTeam('{{ team.id }}')">Edit Team</button>
+<button onclick="redirectToHome()">Home</button>
+
+<script>
+    function editTeam(teamId) {
+        window.location.href = `http://127.0.0.1:8000/user/edit_team/${teamId}/`;
+    }
+
+    function redirectToHome() {
+        window.location.href = 'http://127.0.0.1:8000/user/';
+    }
+</script>
+
+</body>
+</html>

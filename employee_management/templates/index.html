@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee and Team List</title>
+
+    <style>
+        body {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 45%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .edit-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .edit-button:hover {
+            background-color: #45a049;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        button {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #005879;
+        }
+
+        .warning {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Employee List</h2>
+    <button onclick="redirectTo('http://127.0.0.1:8000/user/create_user')">Create User</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Team Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in employees %}
+            <tr>
+                <td>{{ emp.id }}</td>
+                <td>{{ emp.name }}</td>
+                <td>{{ emp.email }}</td>
+                <td>
+                    {% if emp.team_id %}
+                        {% for team in teams %}
+                            {% if team.id == emp.team_id %}
+                                {{ team.name }}
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        No Team Assigned
+                    {% endif %}
+                </td>
+                <td>
+                    <button onclick="edit_employee({{ emp.id }})" class="edit-button">Edit</button>
+                    <button onclick="delete_employee({{ emp.id }})" class="edit-button">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="container">
+    <h2>Team List</h2>
+    <button onclick="redirectTo('http://127.0.0.1:8000/user/create_team')">Create Team</button>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Team Lead</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+            <tr>
+                <td>{{ team.id }}</td>
+                <td>{{ team.name }}</td>
+                <td> {{ team.description }}</td>
+                <td>
+                    {% if team.team_lead_id %}
+                        {% for emp in employees %}
+                            {% if emp.id == team.team_lead_id %}
+                                {{ emp.name }}
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        No Team Lead Assigned
+                    {% endif %}
+                </td>
+                <td>
+                    <button onclick="edit_team({{ team.id }})" class="edit-button">Edit</button>
+                    <button onclick="delete_team({{ team.id }})" class="edit-button">Delete</button>
+                    <button onclick="showMore({{ team.id }})"> ShowMore</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+function redirectTo(url) {
+    window.location.href = url;
+}
+
+function showMore(id){
+   redirectTo(`http://127.0.0.1:8000/user/show_team/${id}`)
+   }
+function edit_employee(id){
+    window.location = `http://127.0.0.1:8000/user/edit/${id}`;
+}
+function edit_team(id){
+    window.location.href = `http://127.0.0.1:8000/user/edit_team/${id}`;
+}
+function delete_employee(id){
+    let text = "Are you sure? This action cannot be undone.";
+    if (confirm(text)) {
+        fetch(`http://127.0.0.1:8000/user/delete_user/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message)
+            if(data.code == 1){
+                redirectTo('http://127.0.0.1:8000/user')
+            }
+            console.log('Success:', data);
+        });
+    }
+}
+function delete_team(id){
+    let text = "Are you sure? This action cannot be undone.";
+    if (confirm(text)) {
+        fetch(`http://127.0.0.1:8000/user/delete_team/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message)
+            if(data.code == 1){
+                redirectTo('http://127.0.0.1:8000/user')
+            }
+            console.log('Success:', data);
+        });
+    }
+}
+</script>
+</body>
+</html>

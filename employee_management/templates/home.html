@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create User</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .show_content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        #createUserForm {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        @media (max-width: 400px) {
+            #createUserForm {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="show_content">
+    <form id="createUserFormcsrf">
+        {% csrf_token %}
+    </form>
+    <h2>Create User</h2>
+    <div id="createUserForm">
+        <input type="text" placeholder="Full Name" name="name">
+        <input type="email" placeholder="Email" name="email">
+        <input type="number" placeholder="Team ID"  name="teamid">
+        <button onclick="submitForm()">Submit</button>
+    </div>
+</div>
+
+<script>
+    function validateEmail(email) {
+        var re = /\S+@\S+\.\S+/;
+        return re.test(email);
+    }
+
+    function redirectTo(url) {
+        window.location.href = url;
+    }
+
+    function callApi(api_url, jsonData) {
+        fetch(`http://127.0.0.1:8000/${api_url}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+            },
+            body: jsonData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            redirectTo("http://127.0.0.1:8000/user/")
+        })
+        .catch(error => {
+            alert("Some thing went wrong");
+            console.error('Error:', error);
+        });
+    }
+
+    function submitForm() {
+        let form_data = document.getElementById("createUserForm").getElementsByTagName("input");
+        if (form_data[0].value && form_data[1].value ) {
+            var jsonData = {};
+            jsonData[form_data[0].name] = form_data[0].value;
+            jsonData[form_data[1].name] = form_data[1].value;
+            jsonData[form_data[2].name] = form_data[2].value;
+            callApi("user/create_user", JSON.stringify(jsonData));
+        } else {
+            alert("Please enter all details");
+        }
+    }
+</script>
+
+</body>
+</html>

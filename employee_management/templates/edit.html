@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Employee</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        form {
+            max-width: 400px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        @media (max-width: 400px) {
+            form {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h2>Edit Employee</h2>
+<form id="editEmployeeForm">
+    {% csrf_token %}
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" value="{{ employee.name }}" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" value="{{ employee.email }}" required>
+
+    <label for="team">Team ID:</label>
+    <input type="number"  min ="1" id="team" name="team" value="{{ employee.team_id }}" required>
+
+    <button type="button" onclick="updateEmployee( {{ employee.id }} )">Update Employee</button>
+</form>
+
+<button onclick="redirectTo('http://127.0.0.1:8000/user')">Home</button>
+<button onclick="redirectTo('http://127.0.0.1:8000/user/create_user')">Create User</button>
+<button onclick="redirectTo('http://127.0.0.1:8000/user/create_team')">Create Team</button>
+
+<script>
+    function redirectTo(url) {
+        window.location.href = url;
+    }
+
+    function updateEmployee(id) {
+        const form = document.getElementById('editEmployeeForm');
+        const formData = new FormData(form);
+
+        fetch(`http://127.0.0.1:8000/user/edit/${id}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message)
+            if(data.code == 1){
+                redirectTo('http://127.0.0.1:8000/user')
+            }
+            console.log('Success:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+    }
+</script>
+
+</body>
+</html>
